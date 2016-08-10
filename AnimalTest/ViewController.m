@@ -188,31 +188,41 @@
     CAKeyframeAnimation *keyAnimation = [CAKeyframeAnimation new];
     keyAnimation.keyPath = @"position.x";
 //    @() 还可以接受 int 字面量或 int 变量作为参数  否则int无法作为变量
-    keyAnimation.values = @[@(0),@(20),@(-20),@(0)];
+    keyAnimation.values = @[@(0),@(30),@(-30),@(0)];
+    //注意这个keyTimes只能跟values结合使用。如果没有value数组则不生效
+    //设定每个关键帧的时长，如果没有显式地设置，则默认每个帧的时间=总duration/(values.count - 1)
+    keyAnimation.keyTimes = @[[NSNumber numberWithFloat:0.2],
+                               [NSNumber numberWithFloat:1.0], [NSNumber numberWithFloat:0.8],
+                               [NSNumber numberWithFloat:2]];
+    keyAnimation.timingFunctions = @[[CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut],[CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionLinear],[CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionLinear],[CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionLinear]];
+    
 //    additive设置为true是使Core Animation 在更新 presentation layer 之前将动画的值添加到 model layer 中去。可以看到上面的values是0，10，-10，0. 没有设置的话values=layer.position.x+0, layer.position.x+10, layer.position.x-10
     keyAnimation.additive = YES;
-    keyAnimation.duration = 0.3;
+    keyAnimation.duration = 3;
     keyAnimation.repeatCount = 5;
     
     CAKeyframeAnimation *keyAnimation2 = [CAKeyframeAnimation new];
     keyAnimation2.keyPath = @"position";
     CGRect boundRect = CGRectMake(_bottomBtn.frame.origin.x, _bottomBtn.frame.origin.y, 100, 100);
     keyAnimation2.path = CGPathCreateWithRect(boundRect, nil);
-    keyAnimation2.duration = 3;
+    keyAnimation2.autoreverses = NO;
+    keyAnimation2.duration = 4;
     keyAnimation2.repeatCount = HUGE;
+    
     //其值为kCAAnimationPaced，保证动画向被驱动的对象施加一个恒定速度，不管路径的各个线段有多长，并且无视我们已经设置的keyTimes
     keyAnimation2.calculationMode = kCAAnimationPaced;
     //kCAAnimationRotateAuto，确定其沿着路径旋转（具体要自己来体验，这里难解释）这个属性主要关系到layer运行起来以后控件的状态。具体自己试试效果
     keyAnimation2.rotationMode = kCAAnimationRotateAutoReverse;
     
     
-    [self.bottomBtn.layer addAnimation:keyAnimation2 forKey:nil];
+    [self.bottomBtn.layer addAnimation:keyAnimation forKey:@"keyAnimation"];
 }
 
 /*
 //演员--->CALayer，规定电影的主角是谁
 //剧本--->CAAnimation，规定电影该怎么演，怎么走，怎么变换
 //开拍--->AddAnimation，开始执行
+  Layer是绘图的画板，Bezier是画图的画笔，Animation是画图的动作
 //http://blog.csdn.net/smking/article/details/8424245  动画Demo
  CABasicAnimation正在进行动画的时候，点击了Home按钮后再回到app的时候，动画会被清空。
 */
